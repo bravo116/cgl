@@ -1,0 +1,88 @@
+#include <GL/glut.h>
+#include <cmath>
+void init() {
+    glClearColor(1.0, 1.0, 1.0, 1.0);
+    glEnable(GL_DEPTH_TEST);
+    glMatrixMode(GL_PROJECTION);
+    gluPerspective(45.0, 1.0, 1.0, 100.0);
+    glMatrixMode(GL_MODELVIEW);
+}
+void drawCuboid(float x, float y, float z, float length, float width, float height, float r, float g, float b) {
+    glColor3f(r, g, b);
+    glPushMatrix();
+    glTranslatef(x, y, z);
+    glScalef(length, width, height);
+    glutSolidCube(1.0);
+    glPopMatrix();
+}
+
+void drawCylinder(float x, float y, float z, float radius, float height, float r, float g, float b) {
+    glColor3f(r, g, b);
+    glPushMatrix();
+    glTranslatef(x, y, z);
+    glRotatef(-90, 1.0, 0.0, 0.0);
+    GLUquadric* quad = gluNewQuadric();
+    gluCylinder(quad, radius, radius, height, 32, 32);
+    gluDeleteQuadric(quad);
+    glPopMatrix();
+}
+
+void translate(float dx, float dy, float dz) {
+    glTranslatef(dx, dy, dz);
+}
+void rotate(float angle, float x, float y, float z) {
+    glRotatef(angle, x, y, z);
+}
+void scale(float sx, float sy, float sz) {
+    glScalef(sx, sy, sz);
+}
+void display() {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glLoadIdentity();
+    gluLookAt(0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+    glPushMatrix();
+    drawCuboid(-2, 0, 0, 2, 2, 2, 0.0f, 0.0f, 1.0f);
+    translate(4, 0, 0);
+    drawCuboid(-2, 0, 0, 2, 2, 2, 0.0f, 1.0f, 0.0f);
+    glPushMatrix();
+    rotate(45, 0, 1, 0);
+    drawCuboid(-2, 0, 0, 2, 2, 2, 1.0f, 0.0f, 0.0f);
+    glPopMatrix();
+    glPushMatrix();
+    scale(1.5, 1.5, 1.5);
+    drawCuboid(-2, 0, 0, 2, 2, 2, 0.5f, 0.0f, 0.5f);
+    glPopMatrix();
+    glPopMatrix();
+    glPushMatrix();
+    drawCylinder(2, 2, 0, 1, 10, 1.0f, 0.0f, 0.0f);
+    translate(0, -2, 0);
+    drawCylinder(2, 2, 0, 1, 10, 0.0f, 1.0f, 0.0f);
+    glPushMatrix();
+    rotate(30, 1, 0, 0);
+    drawCylinder(2, 2, 0, 1, 10, 0.0f, 0.0f, 1.0f);
+    glPopMatrix();
+    glPushMatrix();
+    scale(1.5, 1.5, 1.5);
+    drawCylinder(2, 4, 0, 1, 12, 0.5f, 0.5f, 0.0f);
+    glPopMatrix();
+    glPopMatrix();
+    glutSwapBuffers();
+}
+void timer(int value) {
+    glutPostRedisplay();
+    glutTimerFunc(33, timer, 0);
+}
+int main(int argc, char** argv) {
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+    glutInitWindowSize(800,800);
+    glutInitWindowPosition(100, 100);
+    glutCreateWindow("3D Geometric Operations with FreeGLUT");
+    init();
+    glutDisplayFunc(display);
+    glutTimerFunc(33, timer, 0);
+
+    glutMainLoop();
+    return 0;
+}
+
