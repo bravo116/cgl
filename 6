@@ -1,0 +1,93 @@
+#include <GL/freeglut.h>
+#include <cstdlib>
+#include <ctime>
+#include <cmath>
+
+// Define object properties
+const int num_objects = 10;
+struct Object {
+    float x;
+    float y;
+    float radius;
+    float speed_x;
+    float speed_y;
+    float color[3];
+};
+Object objects[num_objects];
+
+void initObjects() {
+    srand(static_cast<unsigned int>(time(NULL)));
+    for (int i = 0; i < num_objects; ++i) {
+        objects[i].x = rand() % (800 - 100) + 50;
+        objects[i].y = rand() % (600 - 100) + 50;
+        objects[i].radius = rand() % 21 + 10;
+        objects[i].speed_x = rand() % 11 - 5;
+        objects[i].speed_y = rand() % 11 - 5;
+        objects[i].color[0] = static_cast<float>(rand()) / RAND_MAX;
+        objects[i].color[1] = static_cast<float>(rand()) / RAND_MAX;
+        objects[i].color[2] = static_cast<float>(rand()) / RAND_MAX;
+    }
+}
+
+void drawObjects() {
+    for (int i = 0; i < num_objects; ++i) {
+        glPushMatrix();
+        glTranslatef(objects[i].x, objects[i].y, 0.0);
+        glColor3fv(objects[i].color);
+        glBegin(GL_POLYGON);
+        for (float angle = 0; angle < 360; angle += 10) {
+            float x = objects[i].radius * cos(angle * M_PI / 180.0);
+            float y = objects[i].radius * sin(angle * M_PI / 180.0);
+            glVertex2f(x, y);
+        }
+        glEnd();
+        glPopMatrix();
+    }
+}
+
+void updateObjects() {
+    for (int i = 0; i < num_objects; ++i) {
+        objects[i].x += objects[i].speed_x;
+        objects[i].y += objects[i].speed_y;
+        if (objects[i].x - objects[i].radius < 0 || objects[i].x + objects[i].radius > 800) {
+            objects[i].speed_x = -objects[i].speed_x;
+        }
+        if (objects[i].y - objects[i].radius < 0 || objects[i].y + objects[i].radius > 600) {
+            objects[i].speed_y = -objects[i].speed_y;
+        }
+    }
+}
+
+void display() {
+    glClear(GL_COLOR_BUFFER_BIT);
+    drawObjects();
+    glutSwapBuffers();
+    updateObjects();
+}
+
+void reshape(int w, int h) {
+    glViewport(0, 0, w, h);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(0, 800, 0, 600);
+    glMatrixMode(GL_MODELVIEW);
+}
+
+void timer(int) {
+    updateObjects();
+    glutPostRedisplay();
+    glutTimerFunc(16, timer, 0); // ~60 FPS
+}
+
+int main(int argc, char** argv) {
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+    glutInitWindowSize(800, 600);
+    glutCreateWindow("Animation Effects");
+    glutDisplayFunc(display);
+    glutReshapeFunc(reshape);
+    initObjects();
+    glutTimerFunc(0, timer, 0); // Start the timer
+    glutMainLoop();
+    return 0;
+}
